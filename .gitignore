@@ -30,3 +30,4 @@ coverage
 
 .wrangler
 .playwright-mcp
+wrangler.jsonc
