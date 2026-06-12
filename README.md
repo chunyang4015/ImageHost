@@ -8,6 +8,10 @@
 - 上传历史记录（localStorage 存储）
 - 管理后台（`/admin`），查看所有已上传图片，支持删除和复制链接
 - 无需服务器，托管在 Cloudflare Pages
+## 截图
+![image](https://imagehost-34w.pages.dev/v2/RZdl8ct.jpeg)
+
+![image](https://imagehost-34w.pages.dev/v2/Kxuh8Mi.jpeg)
 
 ## 部署
 
