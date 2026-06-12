@@ -1,59 +1,93 @@
-# 骤雨重山图床
+# ImageHost
 
-English | [简体中文](https://github.com/uxiaohan/ZYCS-IMG/blob/main/README_CN.md)
+基于 Cloudflare Pages + Imgur API 的简约图床，支持图片上传和管理。
 
-> In the modern Internet environment, fast and stable image access is one of the important factors to improve user experience. This article will introduce how to use Cloudflare Pages to deploy a stable unlimited image bed Imgur, realize image upload and access, and further accelerate through WordPress's WP.COM global image cache to improve image loading speed. It can be used for free image hosting solutions, alternatives such as Flickr.
+## 功能
 
-## Introduction
+- 图片上传至 Imgur，通过 Cloudflare CDN 加速访问
+- 上传历史记录（localStorage 存储）
+- 管理后台（`/admin`），查看所有已上传图片，支持删除和复制链接
+- 无需服务器，托管在 Cloudflare Pages
 
-- [Cloudflare Pages](https://pages.cloudflare.com/) is a powerful static website hosting service that combines the advantages of Cloudflare's global CDN (content distribution network).
+## 部署
 
-- [Imgur](https://imgur.com/) is a A free high-quality image hosting.
+### 1. Fork 或克隆本项目
 
-- [WordPress's global image cache](https://01.wp.com/) is an efficient CDN service specifically designed to accelerate WordPress-hosted image content. It uses globally distributed nodes to cache images and provide fast access.
+```bash
+git clone git@github.com:chunyang4015/ImageHost.git
+```
 
-- [Cloudflare CDN (Content Delivery Network)](https://www.cloudflare.com/zh-cn/application-services/products/cdn/) is a service provided by Cloudflare that is designed to accelerate and protect global web applications.
+### 2. Cloudflare Pages 创建项目
 
-### Page
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. **Workers 和 Pages** → **创建** → **Pages** → **连接到 Git**
+3. 选择你的 GitHub 仓库
+4. 构建设置：
+   - 框架预设：`Vue`
+   - 构建命令：`pnpm build-only`
+   - 输出目录：`dist`
+5. 点击 **保存并部署**
 
-![Sudden Rain and Heavy Mountains Image Hosting](https://uxiaohan.github.io/v2/2024/12/1733291366.webp)
+### 3. 配置 KV 命名空间
 
-[Click to experience Demo](https://wp-cdn.4ce.cn/)
+管理后台依赖 Cloudflare KV 存储图片元数据。
 
-## How to deploy
+1. 左侧菜单 → **存储和数据库** → **Workers KV**
+2. 创建命名空间，名称：`IMAGE_KV`
+3. 进入你的 Pages 项目 → **设置** → **函数**
+4. **KV 命名空间绑定** → 添加绑定：
+   - 变量名称：`IMAGE_KV`
+   - KV 命名空间：选择刚创建的 `IMAGE_KV`
+5. 保存
 
-**One-click deployment**
+### 4. 配置管理密码
 
-Vercel Automated Deployment
+1. Pages 项目 → **设置** → **环境变量**
+2. 添加变量：
+   - 名称：`ADMIN_PASSWORD`
+   - 值：你的管理密码
+   - 选择 **加密**
+3. 保存后重新部署
 
-[![骤雨重山图床](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/uxiaohan/ZYCS-IMG)
+## 本地开发
 
-Cloudflare Pages automatic deployment
+```bash
+# 安装依赖
+pnpm install
 
-[![骤雨重山图床](https://deploy.workers.cloudflare.com/button)](https://dash.cloudflare.com/?to=/:account/workers-and-pages/create/deploy-to-workers&repository=https://github.com/uxiaohan/ZYCS-IMG)
+# 构建前端
+pnpm build-only
 
-**Manual Deployment**
+# 启动本地开发服务器（需要先构建）
+npx wrangler pages dev dist --port 3001 --kv IMAGE_KV
+```
 
-- 1. Prepare a Cloudflare account
-- 2. Fork this repository and freely modify the text in the `App.vue` and `index.html` files
-- 3. Log in to `Cloudflare Dashboard`, open `Workers and Pages`, and create `Pages`
-- 4. `Connect to Git`, select the project you just forked in `Github` or `Gitlab`, and click Start Setup
-- 5. Just change `framework preset` to `Vue`, click Save and Deploy, and the deployment will be successful and put into use
+访问 `http://localhost:3001` 查看首页，`http://localhost:3001/admin` 查看管理后台。
 
-**Picture steps**
+> 注意：本地环境无法访问 Imgur API（网络限制），上传功能仅在 Cloudflare 线上环境可用。
 
-![Sudden Rain and Heavy Mountains Picture Bed](https://uxiaohan.github.io/v2/2024/07/1721640641.png)
-![Sudden Rain and Heavy Mountains Picture Bed](https://uxiaohan.github.io/v2/2024/07/1721640649.png)
-![Sudden Rain and Heavy Mountains Picture Bed](https://uxiaohan.github.io/v2/2024/07/1721640656.png)
+## 项目结构
 
-### Features
+```
+├── functions/              # Cloudflare Pages Functions（后端 API）
+│   ├── upload.js           # 图片上传（转发到 Imgur + 写入 KV）
+│   └── api/admin/
+│       ├── login.js        # 管理员登录
+│       ├── list.js         # 获取图片列表
+│       └── delete/[id].js  # 删除图片
+├── src/
+│   ├── views/
+│   │   ├── Home/           # 上传页面
+│   │   └── Admin/          # 管理后台
+│   ├── components/         # UI 组件
+│   ├── utils/
+│   │   ├── api.ts          # 管理 API 调用
+│   │   └── index.ts        # 工具函数
+│   └── router/             # 路由配置
+├── package.json
+└── vite.config.ts
+```
 
-- Unlimited image storage, you can upload an unlimited number of images to `Imgur`
+## 待办
 
-- No need to purchase a server, hosted on `Cloudflare Pages`, 100,000 requests per day
-
-- No need to buy a domain name, you can use the free second-level domain name `*.pages.dev` provided by `Cloudflare Pages`, and it also supports binding custom domain names
-
-### Project address
-
-[ZYCS-IMG - Github](https://github.com/uxiaohan/ZYCS-IMG)
+- [ ] 从 Imgur 迁移到 Cloudflare R2 对象存储，实现完全自控的图片存储
