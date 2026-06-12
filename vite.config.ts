@@ -10,7 +10,7 @@ import tailwind from 'tailwindcss'
 export default defineConfig({
   css: {
     postcss: {
-      plugins: [tailwind(), autoprefixer()],
+      plugins: [tailwind as any, autoprefixer as any],
     },
   },
   plugins: [
