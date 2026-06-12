@@ -32,8 +32,8 @@
             <span class="meta">{{ formatSize(img.size) }} · {{ formatDate(img.uploadedAt) }}</span>
           </div>
           <div class="copy-btns">
-            <Button variant="outline" size="xs" @click="copyText(img.link, 'URL')">URL</Button>
-            <Button variant="outline" size="xs" @click="copyText(`![image](${img.link})`, 'Markdown')">MD</Button>
+            <Button variant="outline" size="xs" @click="copyText(proxyURL(img.link), 'URL')">URL</Button>
+            <Button variant="outline" size="xs" @click="copyText(`![image](${proxyURL(img.link)})`, 'Markdown')">MD</Button>
           </div>
           <Button variant="destructive" size="xs" @click="handleDelete(img.id)">删除</Button>
         </div>
@@ -50,6 +50,12 @@ import { adminLogin, fetchImages, deleteImage } from '@/utils/api'
 import type { ImageItem } from '@/utils/api'
 
 const { toast } = useToast()
+
+const SITE_ORIGIN = location.origin
+const proxyURL = (link: string) => {
+  const fileId = link.split('/').slice(-1)[0]
+  return fileId ? `${SITE_ORIGIN}/v2/${fileId}` : link
+}
 
 const token = ref<string>(sessionStorage.getItem('admin_token') || '')
 const password = ref('')
