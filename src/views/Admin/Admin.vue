@@ -31,6 +31,10 @@
             <span class="name" :title="img.filename">{{ img.filename }}</span>
             <span class="meta">{{ formatSize(img.size) }} · {{ formatDate(img.uploadedAt) }}</span>
           </div>
+          <div class="copy-btns">
+            <Button variant="outline" size="xs" @click="copyText(img.link, 'URL')">URL</Button>
+            <Button variant="outline" size="xs" @click="copyText(`![image](${img.link})`, 'Markdown')">MD</Button>
+          </div>
           <Button variant="destructive" size="xs" @click="handleDelete(img.id)">删除</Button>
         </div>
       </div>
@@ -41,8 +45,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/toast/use-toast'
 import { adminLogin, fetchImages, deleteImage } from '@/utils/api'
 import type { ImageItem } from '@/utils/api'
+
+const { toast } = useToast()
 
 const token = ref<string>(sessionStorage.getItem('admin_token') || '')
 const password = ref('')
@@ -105,6 +112,21 @@ function formatSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
+async function copyText(text: string, label: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    toast({ title: 'Tips', description: `${label} 复制成功` })
+  } catch {
+    const el = document.createElement('textarea')
+    el.value = text
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
+    toast({ title: 'Tips', description: `${label} 复制成功` })
+  }
 }
 
 function formatDate(iso: string): string {
@@ -236,6 +258,12 @@ function formatDate(iso: string): string {
           font-size: 11px;
           color: #94a3b8;
         }
+      }
+
+      .copy-btns {
+        display: flex;
+        gap: 0.25rem;
+        flex-shrink: 0;
       }
     }
   }
