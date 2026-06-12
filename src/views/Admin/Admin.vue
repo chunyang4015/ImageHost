@@ -80,7 +80,7 @@ async function loadImages() {
   loadingImages.value = true
   try {
     const res = await fetchImages(token.value)
-    images.value = res.images
+    images.value = res.images || []
   } catch {
     handleLogout()
   } finally {
