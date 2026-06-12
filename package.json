@@ -7,7 +7,7 @@
     "dev": "vite --mode dev --open",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
-    "build-only": "vite build --mode pro",
+    "build-only": "vite build --mode pro && cp dist/index.html dist/404.html",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --fix",
     "format": "prettier --write src/"
